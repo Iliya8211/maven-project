@@ -1,101 +1,92 @@
+package lecture14;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Parameters;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.testng.asserts.SoftAssert;
 
-public class HomeWorkTestNG {
-    @Parameters({"num1", "num2"}) //with parameters done
-    @Test(groups = "myExample")
-    public void num1PlusNum2(int num1, int num2) {
-        int result = num1 + num2;//num1 and num2 are added through configurations
-        System.out.println(num1 + "+" + num2 + "=" + result);
-    }
+import java.time.Duration;
 
-    @Test(groups = "secondExample")
-    @DataProvider(name = "generateNumbers")
-    public Object[][] generateNumbers() {
-        return new Object[][]{
-                {2, 3, 5},
-                {5, 7, 9}
-        };
-    }
-    @Test (dataProvider = "generateNumbers")
-    public void num1PlusNum2dataProvider(int a, int b, int expectedSum) {
-        int sum = a + b;
-        Assert.assertEquals(expectedSum,sum, "If test pass, yes they are equal");
-    }
+public class HomeWorkWaits {
+    //Test scenario ID:2 - Check that the Log out Btn is visible and is not as well
+    //1. Log in into the Skillo portal
+    //2. Check that it is correct page
+    //3. Log In into Skillo portal
+    //4.Verify successful logIn - popUp message
+    //5. Check that Log Out Btn is enable
+    //6. Press the Log Out Btn
+    //7. Verify that you are Log Out
 
-    @Parameters({"num1", "num2"}) //with parameters done
-    @Test(groups = "myExampleMinus")
-    public void num1MinusNum2(int num1, int num2) {
-        int result = num1 - num2;//num1 and num2 are added through configurations
-        System.out.println(num1 + "-" + num2 + "=" + result);
-    }
+    private static ChromeDriver driver;
+    private final String HOME_URL = "http://training.skillo-bg.com/posts/all";
 
-    @Test(groups = "thirdExampleMinus")
-    @DataProvider(name = "generateNumbers2")
-    public Object[][] generateNumbers2() {
-        return new Object[][]{
-                {7, 3, 4},
-                {5, 2, 9}
-        };
+    @BeforeMethod
+    public void setup (){
+        WebDriverManager.chromedriver().setup();
+        driver = new ChromeDriver();
+        driver.manage().window().maximize();
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(4));
+        driver.get(HOME_URL);
     }
-    @Test (dataProvider = "generateNumbers2")
-    public void num1MinusNum2(int a, int b, int expectedSum) {
-        int sum = a - b;
-        Assert.assertEquals(expectedSum,sum, "If test fail, the extraction is wrong");
-    }
+   @Test
+   public void logInIntoPortal (){
+       System.out.println("1. Log in into the Skillo portal");
+       WebElement homePage = driver.findElement(By.id("nav-link-login"));
+       WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+       wait.until(ExpectedConditions.elementToBeClickable(homePage)); //clickable means is displayed and is enabled at the same time.
+       homePage.click();
 
-    @Parameters({"num1", "num2"}) //with parameters done
-    @Test(groups = "myExampleMultiply")
-    public void num1MultiplyNum2(int num1, int num2) {
-        int result = num1 * num2;//num1 and num2 are added through configurations
-        System.out.println(num1 + "*" + num2 + "=" + result);
-    }
+       System.out.println("2. Check that it is correct page");
+       WebElement logIn = driver.findElement(By.cssSelector(".h4"));
+       String actualHeaderText = logIn.getText();
+       Assert.assertEquals(actualHeaderText, "Sign in", "Expected header text to be, but got" +
+               actualHeaderText);
 
-    @Test(groups = "thirdExampleMultiply")
-    @DataProvider(name = "generateNumbers1")
-    public Object[][] generateNumbers1() {
-        return new Object[][]{
-                {7, 3, 21},
-                {5, 2, 9}
-        };
-    }
-    @Test (dataProvider = "generateNumbers1")
-    public void num1MultiplyNum2dataProvider(int a, int b, int expectedSum) {
-        int sum = a * b;
-        Assert.assertEquals(expectedSum,sum, "If test fail, the multiply is wrong");
-    }
+       System.out.println("3. Log In into Skillo portal");
+       WebElement username = driver.findElement(By.id("defaultLoginFormUsername"));
+       wait.until(ExpectedConditions.visibilityOf(username));
+       username.clear();//Its not supposed to be any letters in it but for the learning purpose it added it.
+       username.sendKeys("iliya");
 
-    @Parameters({"num1", "num2"}) //with parameters done
-    @Test(groups = "myExampleDivide")
-    public void num1DivideNum2(int num1, int num2) {
-        int result = num1 / num2;//num1 and num2 are added through configurations
-        System.out.println(num1 + "/" + num2 + "=" + result);
-    }
+       WebElement password = driver.findElement(By.id("defaultLoginFormPassword"));
+       wait.until(ExpectedConditions.visibilityOf(password));
+       password.clear(); //same story as username
+       password.sendKeys("123456");
 
-    @Test(groups = "fourthExampleDivide")
-    @DataProvider(name = "generateNumbers3")
-    public Object[][] generateNumbers3() {
-        return new Object[][]{
-                {16, 8, 2},
-                {13, 3, 4}
-        };
-    }
-    @Test (dataProvider = "generateNumbers3")
-    public void num1DivideNum2dataProvider1(int a, int b, int expectedSum) {
-        int sum = a / b;
-        Assert.assertEquals(expectedSum,sum, "If test fail, the result of arithmetic action is wrong");
-    }
+       WebElement signIn = driver.findElement(By.id("sign-in-button"));
+       wait.until(ExpectedConditions.visibilityOf(signIn));
+       signIn.click();
 
+       System.out.println("4.Verify successful logIn - popUp message");
+       WebElement toastElement = driver.findElement(By.cssSelector(".toast-message"));// we get those locators after JavaScript on page was disabled
+       wait.until(ExpectedConditions.visibilityOf(toastElement));
+       String toastMsg = toastElement.getText().trim();
+       Assert.assertEquals(toastMsg, "Successful login!", "Log In not successful, but got " + toastMsg);
+
+       System.out.println("5. Check that Log Out Btn is enable");
+       WebElement logOutBtn = driver.findElement(By.cssSelector(".fa-sign-out-alt"));
+       wait.until(ExpectedConditions.visibilityOf(logOutBtn));
+       Assert.assertTrue(logOutBtn.isEnabled(), "Log Out Btn is not enable and you cannot click on it");
+
+       System.out.println("6. Press the Log Out Btn");
+       logOutBtn.click();
+
+       System.out.println("7. Verify that you are Log Out");
+       WebElement logOutToastMsg = driver.findElement(By.cssSelector(".toast-message")); // we get those locators after JavaScript on page was disabled
+       wait.until(ExpectedConditions.visibilityOf(logOutToastMsg));
+       String actualLogOutText = logOutToastMsg.getText().trim();
+       Assert.assertEquals(actualLogOutText, "Successful logout!", "Log out not successful, we got"
+       + actualLogOutText);
+   }
+   @AfterMethod
+    public void cleanup (){
+        driver.close();
+   }
 }
 
-//adding and code from xml file (testng-parallel.xml) 
-<suite name="Iliya first parallel run" verbose="1" parallel="methods" thread-count="1">//now is on method level, but also can be on class or suite
-    <test name="Parallel Tests">
-        <classes>
-            <class name="HomeWorkTestNG"></class>
-        </classes>
-    </test>
-</suite>
