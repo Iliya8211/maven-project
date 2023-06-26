@@ -90,3 +90,12 @@ public class HomeWorkTestNG {
     }
 
 }
+
+//adding and code from xml file (testng-parallel.xml) 
+<suite name="Iliya first parallel run" verbose="1" parallel="methods" thread-count="1">//now is on method level, but also can be on class or suite
+    <test name="Parallel Tests">
+        <classes>
+            <class name="HomeWorkTestNG"></class>
+        </classes>
+    </test>
+</suite>
